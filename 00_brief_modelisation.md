@@ -48,8 +48,8 @@ Un dépôt par groupe. Un membre le crée, les autres membres le rejoignent.
   ```bash
   pyenv install 3.14.5
   pyenv local 3.14.5
-  python -m venv .venv
-  source .venv/bin/activate
+  python -m venv env
+  source env/bin/activate
   pip install -r requirements.txt        # requests, psycopg2-binary, python-dotenv
   ```
 
@@ -63,6 +63,7 @@ arborescence dans votre dépôt :
 
 ```
 megabase-groupe-1/
+├── drafts/              les fichiers de brouillon (type notebook)
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
