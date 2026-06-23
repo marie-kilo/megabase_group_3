@@ -20,8 +20,6 @@ CREATE TABLE IF NOT EXISTS ehpad (
     adresse TEXT,
     capacite_lits INTEGER,
     code_insee VARCHAR(5) NOT NULL,
-    latitude DECIMAL(9,6),
-    longitude DECIMAL(9,6),
     -- La contrainte qui garantit le lien avec la table commune
     CONSTRAINT fk_commune 
         FOREIGN KEY (code_insee) 

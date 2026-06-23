@@ -1,0 +1,59 @@
+mkdir alice_et_bob
+cd alice_et_bob
+git init
+touch requirements.txt
+
+echo"pandas"
+git add 
+git cpmmit -m "first commit"
+(… dans GitHub)
+
+
+lgit"created"     (lazygit)
+git log 
+git checkout -b froid  (nouvelle branch s'appelle froid)
+git log   (il affiches les commits)
+git status 
+git add main.py 
+
+git commit -m "ajouter main"
+git push 
+( on voit GitHub )
+
+git checkout main 
+git merge froid  --no-ff
+git log 
+
+
+
+*******************
+1- git clone https://github.com/Alice/...   recupérer 
+
+git checkout -b featur/clean-data    (1ère branch)
+git checkout -b/bob/23-06-2026
+
+(il créé 2 branches)
+
+~bob/23-06-2026
+git commit -m "ajouté main"
+git push
+
+
+git pull 
+
+git checkout featur/clean-data   (sans -b pour retourner sur le branch)
+
+
+git branch    (pour voir toutes les branches)
+
+git branch -d le nom de branch    (pour le suprimer)
+
+
+
+git branch --set-upstream-to=origin/bob/23-06-2026
+
+git merge bob/23-06-2026 --no-ff
+
+git status 
+
+git push 
