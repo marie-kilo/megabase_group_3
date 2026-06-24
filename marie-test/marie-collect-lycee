@@ -1,0 +1,40 @@
+import requests
+import psycopg2
+import os
+from dotenv import load_dotenv
+
+def collecter_et_charger_lycees(db):
+    # API URL avec une limite plus grande pour commencer (ex: 100)
+    url = "https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-lycee_gt-effectifs-niveau-sexe-lv/records/?lang=fr&limit=100"
+    
+    response = requests.get(url)
+    if response.status_code != 200:
+        print("Erreur API")
+        return
+
+    data = response.json().get('results', [])
+    
+    for item in data:
+        # Correspondance des champs API vers colonnes SQL
+        uai = item.get('numero_uai')
+        nom = item.get('nom_etablissement')
+        adresse = f"{item.get('adresse_1', '')}, {item.get('code_postal', '')} {item.get('nom_commune', '')}"
+        code_insee = item.get('code_commune') # C'est le code INSEE !
+
+        query = """
+            INSERT INTO lycee (uai, nom, adresse, code_insee)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (uai) DO NOTHING;
+        """
+        
+        try:
+            db.execute(query, (uai, nom, adresse, code_insee))
+        except Exception as e:
+            print(f"Erreur insertion {uai}: {e}")
+
+# Exemple d'appel
+if __name__ == "__main__":
+    from database import Database
+    db = Database()
+    collecter_et_charger_lycees(db)
+    print("✅ Lycées traités.")
