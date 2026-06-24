@@ -40,7 +40,7 @@ CREATE TABLE departement (
 ----1. La commune : point de rattachement central
 
 CREATE TABLE commune (
-    code_insee   VARCHAR(5) PRIMARY KEY,
+    code_insee   VARCHAR(100) PRIMARY KEY,
     nom_commune  VARCHAR(100) NOT NULL,
     code_postal  VARCHAR(10),
     departement  VARCHAR(100),
