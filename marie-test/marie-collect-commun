@@ -1,0 +1,46 @@
+import requests
+import psycopg2
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+def get_departements_from_db(db_conn):
+    """Récupère la liste des codes départements dans la base."""
+    cur = db_conn.cursor()
+    cur.execute("SELECT code_departement FROM departement")
+    depts = [row[0] for row in cur.fetchall()]
+    cur.close()
+    return depts
+
+def collecter_et_charger_communes():
+    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+    cur = conn.cursor()
+    
+    # 1. Récupérer les départements pour itérer
+    codes_depts = get_departements_from_db(conn)
+    
+    for code in codes_depts:
+        print(f"Collecte des communes pour le département : {code}")
+        url = f"https://geo.api.gouv.fr/departements/{code}/communes"
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            communes = response.json()
+            for c in communes:
+                # Gestion de la population (parfois absente, on met 0)
+                pop = c.get('population', 0)
+                
+                cur.execute("""
+                    INSERT INTO commune (code_insee, nom_commune, departement, population) 
+                    VALUES (%s, %s, %s, %s) 
+                    ON CONFLICT (code_insee) DO NOTHING;
+                """, (c['code'], c['nom'], code, pop))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+if __name__ == "__main__":
+    collecter_et_charger_communes()
+    print(" Toutes les communes ont été insérées.")
