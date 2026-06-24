@@ -1,0 +1,34 @@
+import requests
+import psycopg2
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+def collecter_regions():
+    url = "https://geo.api.gouv.fr/regions"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return []
+
+def charger_regions(regions):
+    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+    cur = conn.cursor()
+    
+    for r in regions:
+        # Insertion des données (ignore si le code existe déjà)
+        cur.execute("""
+            INSERT INTO region (code_region, nom_region) 
+            VALUES (%s, %s) 
+            ON CONFLICT (code_region) DO NOTHING;
+        """, (r['code'], r['nom']))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+if __name__ == "__main__":
+    data = collecter_regions()
+    charger_regions(data)
+    print(f"{len(data)} régions insérées avec succès.")

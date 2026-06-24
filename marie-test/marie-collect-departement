@@ -1,0 +1,36 @@
+import requests
+import psycopg2
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+def collecter_departements():
+    # L'API des départements renvoie la liste complète
+    url = "https://geo.api.gouv.fr/departements"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return []
+
+def charger_departements(departements):
+    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+    cur = conn.cursor()
+    
+    for d in departements:
+        # Note : 'code' est le code du département, 'nom' son nom, 
+        # 'codeRegion' est la clé étrangère pour ta table 'region'
+        cur.execute("""
+            INSERT INTO departement (code_departement, nom_departement, code_region) 
+            VALUES (%s, %s, %s) 
+            ON CONFLICT (code_departement) DO NOTHING;
+        """, (d['code'], d['nom'], d['codeRegion']))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+if __name__ == "__main__":
+    data = collecter_departements()
+    charger_departements(data)
+    print(f"{len(data)} départements insérés avec succès.")
