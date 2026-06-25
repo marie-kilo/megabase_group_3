@@ -3,33 +3,63 @@ import psycopg2
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
+
 def collecter_et_charger_lycees(db):
-    # API URL avec une limite plus grande pour commencer (ex: 100)
-    url = "https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-lycee_gt-effectifs-niveau-sexe-lv/records/?lang=fr&limit=100"
-    
-    response = requests.get(url)
-    if response.status_code != 200:
-        print("Erreur API")
-        return
+    import requests
 
-    data = response.json().get('results', [])
-    
-    for item in data:
-        # Correspondance des champs API vers colonnes SQL
-        uai = item.get('numero_uai')
-        nom = item.get('nom_etablissement')
-        adresse = f"{item.get('adresse_1', '')}, {item.get('code_postal', '')} {item.get('nom_commune', '')}"
-        code_insee = item.get('code_commune') # C'est le code INSEE !
+url = "https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-annuaire-education/records"
 
-        query = """
+all_lycees = []
+offset = 0
+limit = 100
+
+while True:
+    params = {
+        "limit": limit,
+        "offset": offset,
+        "where": 'type_etablissement LIKE "LYCEE%"'
+    }
+
+    response = requests.get(url, params=params).json()
+    lycee = response.get("results", [])
+
+    if not lycee:
+        break  # plus rien à récupérer
+
+    all_lycees.extend(lycee)
+    offset += limit
+
+print("Nombre total de lycées récupérés :", len(all_lycees))
+
+# Affichage des 5 premiers lycées
+for l in all_lycees[:5]:
+    uai = l.get("identifiant_de_l_etablissement")
+    nom = l.get("nom_etablissement")
+    adresse = " ".join([
+        str(l.get("adresse_1") or ""),
+        str(l.get("adresse_2") or ""),
+        str(l.get("adresse_3") or "")
+    ]).strip()
+    lat = l.get("latitude")
+    lon = l.get("longitude")
+    code_insee = l.get("code_commune")
+
+    print(f"\nUAI : {uai}")
+    print(f"Nom : {nom}")
+    print(f"Adresse : {adresse}")
+    print(f"Latitude : {lat} | Longitude : {lon}")
+    print(f"Code INSEE : {code_insee}")
+
+    query = """
             INSERT INTO lycee (uai, nom, adresse, code_insee)
             VALUES (%s, %s, %s, %s)
             ON CONFLICT (uai) DO NOTHING;
         """
         
-        try:
+    try:
             db.execute(query, (uai, nom, adresse, code_insee))
-        except Exception as e:
+    except Exception as e:
             print(f"Erreur insertion {uai}: {e}")
 
 # Exemple d'appel
