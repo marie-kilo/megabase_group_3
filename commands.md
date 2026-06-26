@@ -28,6 +28,33 @@
 
 - git diff permet de voir les differences de changements
 
+-----------------------------------------------------------------------------
+
+1. git add .
+2. git commit
+3. git push
+
+4. git checkout feature
+5. git merge no ff branche indivgit
+6. git push
+
+ - autre personne :
+ 
+    git pull de la branche feature
+
+    on régle les conflis et ensuite on fait 
+
+- git status
+- git add
+- git commit
+- git push
+
+
+
+
+
+
+
 
 ## Les commandes pyenv (dans un terminal powershell) :
 

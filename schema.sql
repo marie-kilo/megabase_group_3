@@ -1,7 +1,27 @@
--- Table des communes (ton pivot)
-CREATE TABLE IF NOT EXISTS commune (
-    code_insee VARCHAR(5) PRIMARY KEY,
-    nom_commune VARCHAR(255) NOT NULL
+---schema.sql — Megabase 
+-- La commune est au centre, toutes les typologies s'y rattachent
+-- par clef étrangère sur le code INSEE.
+-- ============================================================
+
+-- Ordre de suppression : tables dépendantes avant la table mère (commune)
+DROP TABLE IF EXISTS mesure_lycee CASCADE;
+DROP TABLE IF EXISTS ehpad CASCADE;
+DROP TABLE IF EXISTS college CASCADE;
+DROP TABLE IF EXISTS entreprise_btp CASCADE;
+DROP TABLE IF EXISTS bibliotheque CASCADE;
+DROP TABLE IF EXISTS gare CASCADE;
+DROP TABLE IF EXISTS pharmacie CASCADE;
+DROP TABLE IF EXISTS lycee CASCADE;
+DROP TABLE IF EXISTS mairie CASCADE;
+DROP TABLE IF EXISTS commune CASCADE;
+DROP TABLE IF EXISTS departement CASCADE;
+DROP TABLE IF EXISTS region CASCADE;
+
+-- 0a. Région (référentiel geo.api.gouv.fr : code région INSEE 2 chiffres)
+--
+CREATE TABLE region (
+    code_region  VARCHAR(2) PRIMARY KEY,
+    nom_region   VARCHAR(100) NOT NULL
 );
 
 
@@ -20,16 +40,17 @@ CREATE TABLE departement (
 ----1. La commune : point de rattachement central
 
 CREATE TABLE commune (
-    code_insee   VARCHAR(5) PRIMARY KEY,
-    nom_commune  VARCHAR(100) NOT NULL,
-    code_postal  VARCHAR(10),
-    departement  VARCHAR(100),
-    region       VARCHAR(100),
-    population   INTEGER,
-    latitude     NUMERIC(10,7),
-    longitude    NUMERIC(10,7)
+    code_insee        VARCHAR(5) PRIMARY KEY,
+    nom_commune       VARCHAR(100) NOT NULL,
+    code_postal       VARCHAR(10),
+    code_departement  VARCHAR(3) NOT NULL,
+    population        INTEGER,
+    latitude          NUMERIC(10,7),
+    longitude         NUMERIC(10,7),
+    CONSTRAINT fk_commune_departement
+        FOREIGN KEY (code_departement)
+        REFERENCES departement (code_departement)
 );
-
 
 --Mairie (1 mairie par commune en général)
 
@@ -79,6 +100,7 @@ CREATE TABLE pharmacie (
     finess       VARCHAR(20) UNIQUE,
     nom          VARCHAR(255) NOT NULL,
     adresse      TEXT,
+    code_postal  VARCHAR(10),
     latitude     NUMERIC(10,7),
     longitude    NUMERIC(10,7),
     code_insee   VARCHAR(5) NOT NULL,
@@ -92,7 +114,7 @@ CREATE TABLE pharmacie (
 
 CREATE TABLE gare (
     id_gare      SERIAL PRIMARY KEY,
-    code_uic     VARCHAR(20) UNIQUE,
+    code_uic     VARCHAR(50) UNIQUE,
     nom          VARCHAR(255) NOT NULL,
     latitude     NUMERIC(10,7),
     longitude    NUMERIC(10,7),
@@ -142,7 +164,7 @@ CREATE TABLE entreprise_btp (
 
 -------Collèges (annuaire de l'éducation)
 
-CREATE TABLE collège (
+CREATE TABLE college (
     id_college   SERIAL PRIMARY KEY,
     uai          VARCHAR(20) UNIQUE,
     nom          VARCHAR(255) NOT NULL,
