@@ -1,0 +1,365 @@
+Gestion des valeurs manquantes
+
+Le script traite :
+
+None
+""
+"NAN"
+"NONE"
+
+Transformation :
+
+None
+
+Appliqué sur :
+
+code INSEE
+code département
+code région
+nombres
+textes
+
+Normalisation des codes INSEE
+
+
+Suppression des espaces
+" 01001 "
+ "01001"
+Passage en majuscule
+"2a004"
+ "2A004"
+Complétion des zéros
+"1001"
+ "01001"
+Gestion Corse
+"2a1"
+ "2A001"
+Vérification longueur
+
+Doit faire :
+
+5 caractères
+
+Sinon rejet.
+
+ Normalisation des codes département
+
+Gestion :
+
+Métropole :
+
+1
+ 01
+
+Corse :
+
+2a
+ 2A
+
+DOM-TOM :
+
+971
+972
+973
+974
+975
+976
+
+Conservés.
+
+ Normalisation des codes région
+
+Ajout du zéro devant :
+
+1
+ 01
+
+Validation :
+
+isdigit()
+ Nettoyage des nombres décimaux
+
+Fonction :
+
+parse_float()
+
+Transforme :
+
+"12,45"
+ 12.45
+
+Accepte :
+
+12
+12.5
+12,5
+
+Retourne :
+
+None
+
+si invalide.
+
+ Nettoyage des entiers
+
+Fonction :
+
+parse_int()
+
+Transforme :
+
+"12"
+ 12
+"12,0"
+ 12
+12.0
+ 12
+ Nettoyage des textes
+
+Fonction :
+
+nettoyer_texte()
+
+Effectue :
+
+Trim
+"  Lyon "
+ "Lyon"
+Suppression des espaces multiples
+"Jean    Dupont"
+"Jean Dupont"
+Conversion en chaîne
+123
+ "123"
+Suppression chaîne vide
+""
+ None
+Troncature
+
+Exemple :
+
+nom_region max 100
+8. Validation des clés obligatoires
+Région
+
+Obligatoire :
+
+code_region
+
+Sinon rejet.
+
+Département
+
+Obligatoire :
+
+code_departement
+code_region
+
+Sinon rejet.
+
+Commune
+
+Obligatoire :
+
+code_insee
+code_departement
+
+Sinon rejet.
+
+Etablissements
+
+Obligatoire :
+
+code_insee
+
+Sinon rejet.
+
+ Conversion des coordonnées GPS
+
+Nettoyage :
+
+latitude
+longitude
+
+Converties en :
+
+float
+10. Validation des identifiants métiers
+Lycées
+uai
+
+Nettoyé.
+
+Collèges
+uai
+nb_eleves
+
+Nettoyés.
+
+Pharmacies
+finess
+
+Nettoyé.
+
+EHPAD
+finess
+capacite_lits
+
+Nettoyés.
+
+Bibliothèques
+identifiant_source
+nb_inscrits
+
+Nettoyés.
+
+Gares
+code_uic
+
+Nettoyé.
+
+Entreprises BTP
+siren
+raison_sociale
+code_naf
+tranche_effectif
+
+Nettoyés.
+
+ Contrôle du SIREN
+
+Le script vérifie :
+
+9 chiffres
+
+Exemple valide :
+
+123456789
+
+Exemple rejeté :
+
+12345
+ABC123
+12. Déduplication
+
+Fonction :
+
+dedupliquer()
+
+Exemple :
+
+[
+ {"code":"A"},
+ {"code":"A"},
+ {"code":"B"}
+]
+
+Résultat :
+
+[
+ {"code":"A"},
+ {"code":"B"}
+]
+Ce qu'il manque encore
+
+Pour un pipeline ETL complet, je rajouterais :
+
+ Vérification des coordonnées GPS
+
+Actuellement :
+
+999
+999
+
+passe.
+
+Il faudrait :
+
+-90 <= latitude <= 90
+-180 <= longitude <= 180
+ Vérification du code postal
+
+Actuellement :
+
+ABCDE
+
+passe.
+
+Contrôle conseillé :
+
+^\d{5}$
+ Vérification du SIREN avec clé Luhn
+
+Actuellement :
+
+123456789
+
+passe.
+
+Mais il faudrait vérifier le SIREN officiel.
+
+ Vérification du FINESS
+
+Contrôle longueur :
+
+9 chiffres
+ Vérification du code UAI
+
+Format :
+
+7 chiffres + lettre
+
+Exemple :
+
+0012345A
+ Contrôle des années
+
+Exemple :
+
+annee = 3025
+
+passe actuellement.
+
+Il faudrait :
+
+1900 <= annee <= année courante
+ Contrôle des populations
+
+Exemple :
+
+population = -500
+
+passe actuellement.
+
+Ajouter :
+
+population >= 0
+ Contrôle des doublons avant chargement
+
+Aujourd'hui tu dédupliques seulement par clé.
+
+Pour certaines tables :
+
+commune : code_insee
+lycée : uai
+pharmacie : finess
+gare : code_uic
+entreprise : siren
+
+Il faudrait dédupliquer automatiquement avant insertion.
+
+ Journal des rejets
+
+Très important.
+
+Créer :
+
+rejets.csv
+
+avec :
+
+ligne rejetée
+raison du rejet
+date
+
+afin de pouvoir auditer le nettoyage.
