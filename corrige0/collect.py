@@ -9,12 +9,12 @@ GEO = "https://geo.api.gouv.fr/communes"
 
 
 def fetch_communes(dept):
-    """Toutes les communes d'un département en 1 call (pas de pagination)."""
+    """Communes d'un département en 1 call (avec leur département et région)."""
     resp = session.get(
         GEO,
         params={
             "codeDepartement": dept,
-            "fields": "nom,code,population",
+            "fields": "nom,code,population,departement,region",
             "format": "json",
         },
         timeout=30,
